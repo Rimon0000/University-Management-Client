@@ -15,10 +15,15 @@ const Login = () =>{
 
     // const {register, handleSubmit} = useForm({
     //     defaultValues: {
-    //         id: "A-0001",
+    //         userId: "A-0001",
     //         password: "admin123"
     //     }
     // })
+
+    const defaultValues = {
+            userId: "A-0001",
+            password: "admin123"
+        }
 
     const [login] = useLoginMutation()
 
@@ -46,7 +51,7 @@ const Login = () =>{
 
     return (
         <Row justify="center" align="middle" style={{height: '100vh'}}>
-        <PHForm onSubmit={onSubmit}>
+        <PHForm onSubmit={onSubmit} defaultValues={defaultValues}>
             <PHInput type="text" name="userId" label="ID:"></PHInput>
             <PHInput type="text" name="password" label="Password:"></PHInput>
             <Button htmlType="submit">Login</Button>
