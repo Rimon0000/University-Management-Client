@@ -1,20 +1,17 @@
 import { Table, TableColumnsType, TableProps } from "antd";
 import { useGetAcademicSemestersQuery } from "../../../redux/features/admin/academicManagement";
+import { TAcademicSemester } from "../../../types/academicManagement.type";
+import { useState } from "react";
 
-type DataType = {
-    key: React.Key;
-    name: string;
-    age: number;
-    address: string;
-}
+export type TTableData = Pick<TAcademicSemester, "_id" | "name" | "year" | "startMonth" | "endMonth">
 
 
 const AcademicSemester = () =>{
-    const {data: semesterData} = useGetAcademicSemestersQuery(undefined)
-    console.log(semesterData);
+    const [params, setParams] = useState([])
+    const {data: semesterData} = useGetAcademicSemestersQuery(params)
 
     const tableData = semesterData?.data?.map(({_id, name, year, startMonth, endMonth}) => ({
-        _id,
+        key:_id,
         name,
         year,
         startMonth,
@@ -22,38 +19,42 @@ const AcademicSemester = () =>{
     }))
 
 
-    const columns: TableColumnsType<DataType> = [
+    const columns: TableColumnsType<TTableData> = [
         {
           title: 'Name',
           dataIndex: 'name',
           filters: [
             {
-              text: 'Joe',
-              value: 'Joe',
+              text: 'Summer',
+              value: 'Summer',
             },
             {
-              text: 'Jim',
-              value: 'Jim',
+              text: 'Autumn',
+              value: 'Autumn',
             },
             {
-              text: 'Submenu',
-              value: 'Submenu',
-              children: [
-                {
-                  text: 'Green',
-                  value: 'Green',
-                },
-                {
-                  text: 'Black',
-                  value: 'Black',
-                },
-              ],
+              text: 'Fall',
+              value: 'Fall',
             },
           ],
         },
         {
           title: 'Year',
           dataIndex: 'year',
+          filters: [
+            {
+              text: '2024',
+              value: '2024',
+            },
+            {
+              text: '2025',
+              value: '2025',
+            },
+            {
+              text: '2026',
+              value: '2026',
+            },
+          ],
         },
         {
           title: 'Start Month',
@@ -66,12 +67,27 @@ const AcademicSemester = () =>{
       ];
       
 
-      const onChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter, extra) => {
-        console.log(filters);
+      const onChange: TableProps<TTableData>['onChange'] = (pagination, filters, sorter, extra) => {
+
+        if(extra.action === 'filter'){
+            const queryParams = []
+
+            filters?.name?.forEach((item) => 
+                queryParams.push({name: 'name', value: item})
+            );
+
+            filters?.year?.forEach((item) => 
+                queryParams.push({name: 'year', value: item})
+            );
+
+            setParams(queryParams)
+
+        }
+       
       };
 
     return (
-        <Table columns={columns} dataSource={tableData} onChange={onChange} showSorterTooltip={{ target: 'sorter-icon' }}/>
+        <Table columns={columns} dataSource={tableData} onChange={onChange}/>
     )
 }
 
