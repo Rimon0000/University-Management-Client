@@ -26,7 +26,6 @@ const AcademicSemester = () =>{
         {
           title: 'Name',
           dataIndex: 'name',
-          showSorterTooltip: { target: 'full-header' },
           filters: [
             {
               text: 'Joe',
