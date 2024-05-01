@@ -1,14 +1,15 @@
-import { Table, TableColumnsType, TableProps } from "antd";
+import { Button, Table, TableColumnsType, TableProps } from "antd";
 import { useGetAcademicSemestersQuery } from "../../../redux/features/admin/academicManagement";
 import { TAcademicSemester } from "../../../types/academicManagement.type";
 import { useState } from "react";
+import { TQueryParam } from "../../../types";
 
-export type TTableData = Pick<TAcademicSemester, "_id" | "name" | "year" | "startMonth" | "endMonth">
+export type TTableData = Pick<TAcademicSemester, "name" | "year" | "startMonth" | "endMonth">
 
 
 const AcademicSemester = () =>{
-    const [params, setParams] = useState([])
-    const {data: semesterData} = useGetAcademicSemestersQuery(params)
+    const [params, setParams] = useState<TQueryParam[] | undefined>(undefined)
+    const {data: semesterData, isLoading, isFetching} = useGetAcademicSemestersQuery(params)
 
     const tableData = semesterData?.data?.map(({_id, name, year, startMonth, endMonth}) => ({
         key:_id,
@@ -61,16 +62,26 @@ const AcademicSemester = () =>{
           dataIndex: 'startMonth',
         },
         {
-            title: 'End Month',
-            dataIndex: 'endMonth',
-          },
+          title: 'End Month',
+          dataIndex: 'endMonth',
+        },
+        {
+          title: 'Action',
+          render: () => {
+            return (
+              <div>
+                <Button>Update</Button>
+              </div>
+            )
+          }
+        }
       ];
       
 
-      const onChange: TableProps<TTableData>['onChange'] = (pagination, filters, sorter, extra) => {
+      const onChange: TableProps<TTableData>['onChange'] = (_pagination, filters, _sorter, extra) => {
 
         if(extra.action === 'filter'){
-            const queryParams = []
+            const queryParams : TQueryParam[] = []
 
             filters?.name?.forEach((item) => 
                 queryParams.push({name: 'name', value: item})
@@ -86,8 +97,12 @@ const AcademicSemester = () =>{
        
       };
 
+      if(isLoading){
+        return <p>Loading...</p>
+      }
+
     return (
-        <Table columns={columns} dataSource={tableData} onChange={onChange}/>
+        <Table loading={isFetching} columns={columns} dataSource={tableData} onChange={onChange}/>
     )
 }
 
