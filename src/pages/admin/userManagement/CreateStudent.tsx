@@ -5,7 +5,9 @@ import { FieldValues, SubmitHandler } from "react-hook-form";
 import PHSelect from "../../../components/form/PHSelect";
 import { bloodGroupOptions, genderOptions } from "../../../constants/global";
 import PHDatePicker from "../../../components/form/PHDatepicker";
-import { useGetAllSemestersQuery } from "../../../redux/features/admin/academicManagement.api";
+import { useGetAcademicDepartmentQuery, useGetAllSemestersQuery } from "../../../redux/features/admin/academicManagement.api";
+import { useAddStudentMutation } from "../../../redux/features/admin/userManagement.api";
+import Password from "antd/es/input/Password";
 
 const studentDummyData = {
         "password": "student123",
@@ -84,22 +86,37 @@ const studentDefaultValues = {
 }
 
 const CreateStudent = () =>{
-    const {data:sData, isLoading: sLoading} = useGetAllSemestersQuery(undefined)
+    const [addStudent, {data, error}] = useAddStudentMutation()
+    console.log({data, error});
+
+
+    const {data:sData, isLoading: sIsLoading} = useGetAllSemestersQuery(undefined)
+    const {data:dData, isLoading: dIsLoading} = useGetAcademicDepartmentQuery(undefined)
+
     const semesterOptions = sData?.data?.map((item) => ({
         value: item._id,
         label: `${item.name} ${item.year}`
     }))
 
+    const departmentOptions = dData?.data?.map((item) => ({
+        value: item._id,
+        label: item.name
+    }))
+
 
     const onSubmit: SubmitHandler<FieldValues> = (data) =>{
-        console.log(data);
+        const studentData = {
+            Password: 'student123',
+            student: data
+        }
 
-        // const formData = new FormData()
-        // formData.append("data", JSON.stringify(data))
+        const formData = new FormData()
+        formData.append("data", JSON.stringify(studentData))
+        addStudent(formData)
 
         //! This is for development
         //! Just for checking
-        // console.log(Object.fromEntries(formData));
+        console.log(Object.fromEntries(formData));
     }
     return (
         <Row>
@@ -189,10 +206,10 @@ const CreateStudent = () =>{
                     <Divider>Academic Info.</Divider>
                     <Row gutter={8}>
                         <Col span={24} md={{span: 12}} lg={{span: 8}}>
-                            <PHSelect disabled={sLoading} name="admissionSemester" label="Admission Semester" options={semesterOptions}/>  
+                            <PHSelect disabled={sIsLoading} name="admissionSemester" label="Admission Semester" options={semesterOptions}/>  
                         </Col>
                         <Col span={24} md={{span: 12}} lg={{span: 8}}>
-                            <PHInput type="text" name="academicDepartment" label="Academic Department"/>    
+                            <PHSelect disabled={dIsLoading} name="academicDepartment" label="Academic Department" options={departmentOptions}/>  
                         </Col>
                     </Row>
                     <Button htmlType="submit">Submit</Button>
