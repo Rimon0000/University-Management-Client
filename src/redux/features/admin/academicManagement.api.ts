@@ -5,7 +5,7 @@ import { baseApi } from "../../api/baseApi";
 
 const academicManagementApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAcademicSemesters: builder.query({
+        getAllSemesters: builder.query({
           query: (args) => {
             console.log(args);
             const params = new URLSearchParams()
@@ -38,4 +38,4 @@ const academicManagementApi = baseApi.injectEndpoints({
     }),
 })
 
-export const {useGetAcademicSemestersQuery, useAddAcademicSemesterMutation} = academicManagementApi;
+export const {useGetAllSemestersQuery, useAddAcademicSemesterMutation} = academicManagementApi;
