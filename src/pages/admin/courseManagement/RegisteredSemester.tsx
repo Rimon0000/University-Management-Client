@@ -1,25 +1,57 @@
-import { Button, Table, TableColumnsType, TableProps } from "antd";
-import { TAcademicSemester } from "../../../types/academicManagement.type";
-import { useGetAllRegisteredSemesterQuery } from "../../../redux/features/admin/courseManagement.api";
-export type TTableData = Pick<
-  TAcademicSemester,
-  "name" | "year" | "startMonth" | "endMonth"
->;
+import { Button, Dropdown, Table, TableColumnsType, Tag } from "antd";
+import { useGetAllRegisteredSemesterQuery, useUpdateRegisteredSemesterMutation } from "../../../redux/features/admin/courseManagement.api";
+import moment from "moment";
+import { TSemester } from "../../../types";
+import { useState } from "react";
+export type TTableData = Pick<TSemester, "status" | "startDate" | "endDate">;
+
+const items = [
+    {
+        label: 'Upcoming',
+        key: 'UPCOMING'
+    },
+    {
+        label: 'Ongoing',
+        key: 'ONGOING'
+    },
+    {
+        label: 'Ended',
+        key: 'ENDED'
+    },
+]
 
 const RegisteredSemester = () => {
 //   const [params, setParams] = useState<TQueryParam[] | undefined>(undefined);
+const [semesterId, setSemesterId] = useState('')
 
 const {data:semesterData, isFetching, isLoading} = useGetAllRegisteredSemesterQuery(undefined)
+const [updateSemesterStatus] = useUpdateRegisteredSemesterMutation()
 
   const tableData = semesterData?.data?.map(
     ({ _id, academicSemester, status, startDate, endDate }) => ({
       key: _id,
       name: `${academicSemester.name} ${academicSemester.year}`,
       status, 
-      startDate, 
-      endDate,
+      startDate: moment(new Date(startDate)).format('MMMM'), 
+      endDate: moment(new Date(endDate)).format('MMMM'),
     })
   );
+
+  const handleStatusUpdate = (data) =>{
+    const updateData = {
+        id: semesterId,
+        data: {
+            status: data.key
+        }
+    }
+    
+    updateSemesterStatus(updateData)
+  }
+
+  const menuProps = {
+    items,
+    onClick: handleStatusUpdate
+  }
 
   const columns: TableColumnsType<TTableData> = [
     {
@@ -31,6 +63,19 @@ const {data:semesterData, isFetching, isLoading} = useGetAllRegisteredSemesterQu
       title: "Status",
       key: "status",
       dataIndex: "status",
+      render: (item) => {
+        let color;
+        if(item === 'UPCOMING'){
+            color = "blue";
+        }
+        if(item === 'ONGOING'){
+            color = "green";
+        }
+        if(item === 'ENDED'){
+            color = "red";
+        }
+        return <Tag color={color}>{item}</Tag>
+      }
     },
     {
       title: "Start Date",
@@ -42,11 +87,11 @@ const {data:semesterData, isFetching, isLoading} = useGetAllRegisteredSemesterQu
     },
     {
       title: "Action",
-      render: () => {
+      render: (item) => {
         return (
-          <div>
-            <Button>Update</Button>
-          </div>
+          <Dropdown menu={menuProps} trigger={['click']}>
+            <Button onClick={() => setSemesterId(item.key)}>Update</Button>
+          </Dropdown>
         );
       },
     },
